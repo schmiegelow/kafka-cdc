@@ -69,6 +69,8 @@ services:
       ELASTICSEARCH_URL: http://elasticsearch:9200
     ports:
         - "5601:5601"
+    depends_on:
+      - elasticsearch
   mysql:
     image: mysql
     environment:
@@ -76,6 +78,18 @@ services:
       MYSQL_USER: confluent
       MYSQL_PASSWORD: confluent
       MYSQL_DATABASE: connect_test
+  schema-registry:
+    image: confluentinc/cp-schema-registry:latest
+    depends_on:
+      - zookeeper
+      - kafka01.internal-service
+      - kafka02.internal-service
+      - kafka03.internal-service
+    ports:
+      - '8081:8081'
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper.internal-service:2181
   kafka-connect:
     build: kafka-connect
     ports:
@@ -93,6 +107,8 @@ services:
       CONNECT_VALUE_CONVERTER: "io.confluent.connect.avro.AvroConverter"
       CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
       CONNECT_VALUE_CONVERTER_SCHEMA_IGNORE: "true"
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
       CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
       CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
       CONNECT_REST_ADVERTISED_HOST_NAME: "kafka-connect"
@@ -101,4 +117,5 @@ services:
     depends_on:
       - elasticsearch
       - kafka01.internal-service
+      - schema-registry
       - mysql
