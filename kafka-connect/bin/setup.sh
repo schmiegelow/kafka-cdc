@@ -24,8 +24,7 @@ curl -X POST \
   "config": {
   "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
   "tasks.max": 1,
-  "connection.url":
-  "jdbc:mysql://mysql:3306/connect_test?user=root&password=confluent&useSSL=false",
+  "connection.url": "jdbc:mysql://mysql:3306/connect_test?user=root&password=confluent&allowPublicKeyRetrieval=true&useSSL=false",
   "mode": "incrementing",
   "incrementing.column.name": "id",
   "timestamp.column.name": "modified",
